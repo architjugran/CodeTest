@@ -49,16 +49,16 @@ def register(request):
     return render(request, 'registerForm.html')
 
 def home(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated: # if user is logged in, filter his notes and show them on the page
         notes = Note.objects.filter(user=request.user)
         context = {'notes': notes}
         return render(request, 'note.html', context)
-    return redirect('/login_user/')
+    return redirect('/login_user/') # if user is not logged in, display login page
 
 def createNote(request):
-    if not request.user.is_authenticated:
-        return redirect('/login_user/')
-    else:
+    if not request.user.is_authenticated:# if user is not logged in, display login page
+        return redirect('/login_user/') 
+    else:#else open the form page, then when user enters data, save the data into the database and redirect to home page to show the new list of notes
         form = NoteForm(request.POST or None)
         if form.is_valid():
             info = form.save(commit=False)
@@ -70,12 +70,12 @@ def createNote(request):
         }
         return render(request, 'noteForm.html', context)
 
-def editNote(request,pk):
+def editNote(request,pk):#when edit button is clicked, first control goes into else block and user is shown form page, then on clicking Submit- control will go to if block
     info = Note.objects.get(id=pk)
     if request.method == "POST":
         form = NoteForm(request.POST or None, instance=info)
         if form.is_valid():
-            eduinfo = form.save(commit=False)
+            eduinfo = form.save(commit=False)#saving new information
             eduinfo.user = request.user
             eduinfo.save()
             return redirect('/')
@@ -84,6 +84,6 @@ def editNote(request,pk):
     return render(request, 'noteForm.html', {'form': form})
 
 def deleteNote(request,pk):
-    instance = Note.objects.get(id=pk)
-    instance.delete()
+    instance = Note.objects.get(id=pk)#get note object from database with corresponding id
+    instance.delete()#delete note object
     return redirect('/')
